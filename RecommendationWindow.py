@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QSize, Qt,pyqtSignal
 from PyQt5.QtGui import *
 from SomeWidgets import Label,HBox,MyListWidget
-from Singleton import SingletonDecorator,foo
+
 import database
 foo = {}
 
@@ -39,7 +39,8 @@ class RecommendationWindow(QWidget):
 
         hbox = QHBoxLayout()
         self.button = QPushButton("Back")
-        self.button.minimumSizeHint()
+        self.button.setMinimumSize(self.button.minimumSizeHint())
+        
         self.vbox = VBox()
         hbox.addLayout(self.vbox)
         self.listWidget = MyListWidget()
@@ -51,7 +52,9 @@ class RecommendationWindow(QWidget):
         self.listWidget.itemClicked.connect(self.changeLayout)
 
     def changeLayout(self):
-        anime_recommended = foo['val'].get_similar_by_user(foo['user'],size=5)
+
+        anime_recommended = foo['cont'].get_similar_by_user(foo['user'],size=5)
+
         self.vbox.clear()
         item = self.listWidget.currentItem()
         if item is None:
@@ -59,13 +62,15 @@ class RecommendationWindow(QWidget):
 
         anime_id = database.animes[database.animes['name'] == item.text()].iloc[0]['anime_id']
 
-        content_anime = foo['cont'].get_similar_by_anime(anime_id,size=5)
+        anime_recommended2 = foo['val'].get_similar_by_user(foo['user'],size=5)
 
-        user_anime=[1,1,1,1,1]
-        self.vbox.add(anime_recommended, user_anime, content_anime, item.text())
+        anime_recommended3 = foo['cont'].get_similar_by_anime(anime_id, size=5)
+
+
+        self.vbox.add(anime_recommended, anime_recommended2, anime_recommended3, item.text())
 
 
     def back_clicked(self):
-        print("entrou")
+
         self.back_to_menu.emit()
         self.hide()

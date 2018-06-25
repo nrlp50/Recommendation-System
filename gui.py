@@ -55,7 +55,7 @@ class GridWindow(QWidget):
     def getAllWidgets(self):
         ret = []
         for i in reversed(range(self.grid.count())):
-            item = self.grid.takeAt(i)
+            item = self.grid.itemAt(i)
             item = item.widget()
             anime_name = item.anime_name
             anime_id = item.anime_id
@@ -92,12 +92,10 @@ class MainWindow(QWidget):
 
         classified_animes = self.grid.getAllWidgets()
 
-        # print(len(foo['user'].columns))
+
         for i in classified_animes:
             foo['user'][str(i[0])] = i[2]
-            # print(i[0],i[2])
-
-
+            
         foo['val'].process(foo['user'])
 
 

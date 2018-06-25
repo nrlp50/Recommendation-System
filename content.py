@@ -8,7 +8,7 @@ class Content:
     def __init__(self, animes):
         self._animes = animes
         self._process()
-
+        # self._processed.columns = [str(i).strip() for i in self._processed.columns]
     def _convGenre(self, genre):
         genre = str(genre).lower()
         return set(genre.split(', '))
@@ -24,7 +24,7 @@ class Content:
         name = re.sub('ö', 'o', name)
         name = re.sub(chars, ' ', name)
         return set(name.split())
-    
+
     def _process(self):
         try:
             self._processed = pd.read_hdf('data/database/processed.h5', key='p')
@@ -32,20 +32,20 @@ class Content:
             with open('data/words.csv') as fl:
                 words = fl.read().split(',')
             types = ['Movie', 'Music', 'ONA', 'OVA', 'Special', 'TV']
-            genres = ['action', 'adventure', 'cars', 'comedy', 'dementia', 
-                'demons', 'drama', 'ecchi', 'fantasy', 'game', 'harem', 
-                'hentai', 'historical', 'horror', 'josei', 'kids', 'magic', 
-                'martial arts', 'mecha', 'military', 'music', 'mystery', 
-                'parody', 'police', 'psychological', 'romance', 'samurai', 
-                'school', 'sci-fi', 'seinen', 'shoujo', 'shoujo ai', 'shounen', 
+            genres = ['action', 'adventure', 'cars', 'comedy', 'dementia',
+                'demons', 'drama', 'ecchi', 'fantasy', 'game', 'harem',
+                'hentai', 'historical', 'horror', 'josei', 'kids', 'magic',
+                'martial arts', 'mecha', 'military', 'music', 'mystery',
+                'parody', 'police', 'psychological', 'romance', 'samurai',
+                'school', 'sci-fi', 'seinen', 'shoujo', 'shoujo ai', 'shounen',
                 'shounen ai', 'slice of life', 'space', 'sports', 'super power',
                 'supernatural', 'thriller', 'vampire', 'yaoi', 'yuri']
-            chars = '[' + "".join(['®', '°', '²', '³', '½', 'ψ', '“', '”', '†', 
+            chars = '[' + "".join(['®', '°', '²', '³', '½', 'ψ', '“', '”', '†',
                 '…', 'δ', '℃', '←', '→', '√', '∞', '␣', '◎', '◯', '★', '☆', '♡',
-                '♥', '♪', '♭', '＊', '\!', '\#', '\$', '\%', '\&', '\(', '\)', 
-                '\*', '\+', '\,', '\-', '\.', '\/', '\:', '\;', '\=', '\?', 
+                '♥', '♪', '♭', '＊', '\!', '\#', '\$', '\%', '\&', '\(', '\)',
+                '\*', '\+', '\,', '\-', '\.', '\/', '\:', '\;', '\=', '\?',
                 '\@', '\[', '\]', '\^', '\~']) + ']'
-            
+
             processed = []
             for _, d in self._animes.iterrows():
                 ws = self._convName(d['name'], chars)
@@ -60,7 +60,7 @@ class Content:
             df = pd.DataFrame(cosine_similarity(processed), columns=labels)
             df.to_hdf('data/database/processed.h5', key='p')
             self._processed = df
-    
+
     def get_similar_by_anime(self, anime_id, user=None, size=10):
         df = self._processed.loc[:,[anime_id]]
         df.sort_values(by=anime_id, ascending=False, inplace=True)
@@ -73,19 +73,19 @@ class Content:
             else:
                 return(result[1:size+1])
         return(self._processed.columns[df.index[1:size+1]])
-    
+
     def get_similar_by_user(self, user, size=10):
         animes = []
         aux = user.sort_values(by=[0], axis=1, ascending=False)
         for anime_id in aux.columns[:size]:
-            animes.append(self.get_similar_by_anime(anime_id, user)[0])
+            animes.append(self.get_similar_by_anime(int(anime_id), user)[0])
         return np.array(animes)
-    
+
     def get_similar_by_most_ratings(self, user, size=10):
         aux = user.sort_values(by=[0], axis=1, ascending=False)
         for i in range(-5, 6)[::-1]:
             df = aux.loc[:,(aux>=i).all()]
             if not df.empty:
-                choosed = df.columns[rnd.randrange(df.shape[1])]
-                return choosed, self.get_similar_by_anime(choosed, user)
+                choosed = int(df.columns[rnd.randrange(df.shape[1])])
+                return choosed, self.get_similar_by_anime(choosed, user,size)
         return -1, pd.DataFrame()

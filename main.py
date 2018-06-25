@@ -13,6 +13,7 @@ from content import Content
 
 
 def showRecommendation(window):
+    print('eeeentrou')
     window.changeLayout()
     window.show()
 
