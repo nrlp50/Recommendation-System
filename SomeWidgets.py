@@ -11,8 +11,8 @@ import database
 class MyListWidget(QListWidget):
     def __init__(self):
         super(MyListWidget,self).__init__()
-        top_animes = database.animes[:50]
-        for i in range(50):
+        top_animes = database.animes
+        for i in range(database.animes.shape[0]):
             self.addItem(top_animes.iloc[i]['name'])
 
 

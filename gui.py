@@ -10,7 +10,7 @@ from collaborative import Collaborative
 foo = {}
 
 anime_list = [1535, 1254, 16498, 527, 11757, 249, 5114, 20, 30276,
-232, 1575, 813, 7674, 550, 32281, 552, 11061, 530, 21, 199, 1614]
+232, 1575, 813, 7674, 550, 32281, 552, 11061, 530, 31964, 199, 1614]
 
 class Window(QWidget):
     def __init__(self, anime_id,anime_name):
@@ -26,7 +26,7 @@ class Window(QWidget):
         self.layout.setContentsMargins(5,5,5,5)
         self.resize(self.pixmap.width(),self.pixmap.height())
         self.cb = QComboBox()
-        self.cb.addItems(['-']+[str(i) for i in range(0,11)])
+        self.cb.addItems(['-']+[str(i) for i in range(1,11)])
         self.layout.addWidget(self.pic)
         self.layout.addWidget(self.cb)
         self.setLayout(self.layout)
@@ -41,8 +41,8 @@ class GridWindow(QWidget):
         self.grid.setContentsMargins(0,0,0,0)
 
 
-        # top_animes = database.animes.set_index('anime_id',drop=True).loc[anime_list].reset_index()
-        top_animes = database.animes.iloc[:21]
+        top_animes = database.animes.set_index('anime_id',drop=True).loc[anime_list].reset_index()
+        # top_animes = database.animes.iloc[:21]
         for i in range(1,4):
             for j in range(1,8):
                 row = top_animes.iloc[(i-1)*7 + j-1] # erro
@@ -60,7 +60,7 @@ class GridWindow(QWidget):
             anime_name = item.anime_name
             anime_id = item.anime_id
             score = item.cb.currentText()
-            score = score if score != '-' else 5
+            score = score if score != '-' else 0
             ret.append((anime_id,anime_name,int(score)))
         return ret
 
@@ -72,7 +72,7 @@ class MainWindow(QWidget):
 
         vbox = QVBoxLayout()
         hbox = QHBoxLayout()
-        label = QLabel("Before we begin, we need to know a bit before a bit about you! Classify the animes below")
+        label = QLabel("Before we begin, we need to know a bit about you! Classify the animes below")
         font = label.font()
         font.setPointSize(30)
         font.setBold(True)
@@ -92,10 +92,10 @@ class MainWindow(QWidget):
 
         classified_animes = self.grid.getAllWidgets()
 
-
+        dic = {10:5, 9:4, 8:3, 7:2, 6:1, 5:-1, 4:-2,3:-3, 2:-4, 1:-5, 0:0}
         for i in classified_animes:
-            foo['user'][str(i[0])] = i[2]
-            
+            foo['user'][str(i[0])] = dic[i[2]]
+
         foo['val'].process(foo['user'])
 
 

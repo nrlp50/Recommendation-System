@@ -5,56 +5,58 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QSize, Qt,pyqtSignal
 from PyQt5.QtGui import *
 from SomeWidgets import Label,HBox,MyListWidget
+import database
 
 class DetailsWindow(QWidget):
-    def __init__(self,anime_name):
-        super(DetailsWindow,self).__init__()
-        hbox = QHBoxLayout()
-        hbox.addWidget(Window(anime_name))
-        self.lw = MyListWidget()
-
-        hbox.addWidget(self.lw)
-        self.setLayout(hbox)
-
-
-
-class Window(QWidget):
     back_recommendation = pyqtSignal()
-    def __init__(self, anime_name):
-        super(Window,self).__init__()
+    def __init__(self, anime_name, content, collaborative,user):
+        super(DetailsWindow,self).__init__()
+        print(anime_name)
         self.anime_name =anime_name
-        self.button = QPushButton("Back")
-        self.button.setSizePolicy(10,10)
-        self.button.clicked.connect(self.clicked)
         self.pic = QLabel()
-        self.pixmap = QPixmap(self.anime_name+".jpg").scaled(147, 200)
+        self.pixmap = QPixmap("covers/"+str(self.anime_name)+".jpg").scaled(147, 200)
         self.pic.setPixmap(self.pixmap)
         vbox = QVBoxLayout()
         hbox = QHBoxLayout()
         hbox.addWidget(self.pic)
-        hbox.addLayout(Form(self.anime_name))
+        hbox.addLayout(Form(self.anime_name,user))
         hbox.setAlignment(Qt.AlignLeft)
-        vbox.addWidget(self.button)
         vbox.addLayout(hbox)
-        vbox.addWidget(Label("People who liked Megalo box also liked",20,True))
-        vbox.addLayout(HBox(['anime','anime','anime','anime','anime']))
-        vbox.addWidget(Label("Anime similar to Megalo box",20,True))
-        vbox.addLayout(HBox(['anime','anime','anime','anime','anime']))
+        name = database.animes[database.animes['anime_id'] == int(anime_name)].iloc[0]['name']
+        vbox.addWidget(Label("People who liked " + name + " also liked",20,True))
+
+        vbox.addLayout(HBox(collaborative))
+
+        vbox.addWidget(Label("Anime similar to " + name, 20,True))
+
+        vbox.addLayout(HBox(content))
         self.setLayout(vbox)
+
     def clicked(self):
         print("apertou")
-        # self.back_recommendation.emit()
-        # self.hide()
 
 
 class Form(QFormLayout):
-    def __init__(self,anime_name):
+    def __init__(self,anime_name,user):
         super(Form,self).__init__()
-        l = ['Information','Name','Rating','Episodes','Genre','Type','Members']
-        for i in l:
-            self.addRow(Label(i+':',15,True),Label('oi',15,True))
+        self.anime_name = anime_name
+        self.user = user
+        l = ['Name','Genre','Type','Episodes','Rating','Members']
 
+        a = database.animes[database.animes['anime_id'] == int(anime_name)].iloc[0]
 
+        for val in l:
+            self.addRow(Label(val+':',15,True),Label(str(a[val.lower()]), 15,True))
+
+        dic = {5:10, 4:9, 3:8, 2:7, 1:6, -1:5, -2:4, -3:3, -4:2, -5:1, 0:0}
+        self.dic2 = {10:5, 9:4, 8:3, 7:2, 6:1, 5:-1, 4:-2,3:-3, 2:-4, 1:-5, 0:0}
+        self.cb = QComboBox()
+        self.cb.addItems(['-']+[str(i) for i in range(1,11)])
+        self.cb.setCurrentIndex(dic[user.iloc[0][anime_name]])
+        self.addRow(Label('Your Rating:',15,True), self.cb)
+        self.cb.currentIndexChanged.connect(self.change)
+    def change(self,i):
+        self.user[self.anime_name] = self.dic2[i]
 
 if __name__ == '__main__':
 
